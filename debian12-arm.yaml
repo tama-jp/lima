@@ -17,11 +17,11 @@ provision:
   - mode: system
     script: |
       #!/usr/bin/env bash
-      apt update -y
-      echo 'deb http://apt.llvm.org/bullseye/ llvm-toolchain-bullseye-16 main' >> /etc/apt/sources.list
-      echo 'deb-src http://apt.llvm.org/bullseye/ llvm-toolchain-bullseye-16 main' >> /etc/apt/sources.list
-      apt install -y git build-essential curl wget gnupg2 xz-utils openssl net-tools
-      apt install -y vim build-essential wget ripgrep fd-find duf colordiff
+      # ■ 共通
+        apt -y update 
+        echo 'deb http://apt.llvm.org/bullseye/ llvm-toolchain-bullseye-16 main' >> /etc/apt/sources.list
+        echo 'deb-src http://apt.llvm.org/bullseye/ llvm-toolchain-bullseye-16 main' >> /etc/apt/sources.list
+        apt -y install git build-essential curl wget gnupg2 xz-utils openssl net-tools vim ripgrep fd-find duf colordiff
       # ■ clang
         # GPG キーの追加
         wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
@@ -93,7 +93,7 @@ provision:
 
       # ■ docker
         sudo usermod -aG docker $(whoami)
-
+        newgrp docker
       # ■ go
         echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
         export PATH=$PATH:/usr/local/go/bin
@@ -107,50 +107,49 @@ provision:
         curl https://sh.rustup.rs -sSf | sh -s -- -y
         . "$HOME/.cargo/env"
       # ■ Tool
-      #      crates=(
-      #        "eza"
-      #        "bat"
-      #        "procs"
-      #        "hexyl"
-      #        "tokei"
-      #        "bottom"
-      #        "du-dust"
-      #      )
-      #
-      #      # クレートを順番にインストール
-      #      for crate in "${crates[@]}"; do
-      #        echo "Installing $crate..."
-      #        cargo install "$crate"
-      #      done
-      # bashrc
-#      cat << 'EOF' >> ~/.bashrc
-#      alias ei="eza --icons --git"
-#      alias ea="eza -a --icons --git"
-#      alias ee="eza -aahl --icons --git"
-#      alias et="eza -T -a -I 'node_modules|.git|.cache' --icons"
-#      alias etd="eza -T -a -D -I 'node_modules|.git|.cache' --icons"
-#      alias ls=ei
-#      alias la=ea
-#      alias ll=ee
-#      alias lt=et
-#      alias ltd=etd
-#      alias l="clear && ls"
-#      alias clt="clear && lt"
-#      alias cltd="clear && ltd"
-#      alias cat='bat'
-#      alias ps='procs'
-#      alias grep='rg'
-#      # alias find='fd'
-#      alias od='hexyl'
-#      alias wc='tokei'
-#      alias cp='fcp'
-#      alias top='btm'
-#      alias du='dust'
-#      alias df='duf'
-#      alias dockerv='lazydocker'
-#      alias gitv='lazygit'
-#      alias gitt='git log --graph --all --date=format-local:"%Y/%m/%d %H:%M:%S" --format="%cd %x09%C(cyan bold)%an%Creset%x09%C(yellow)%h%Creset %C(magenta reverse)%d%Creset %s"'
-#      EOF
+        crates=(
+          "eza"
+          "bat"
+          "procs"
+          "hexyl"
+          "tokei"
+          "bottom"
+          "du-dust"
+        )
+        # クレートを順番にインストール
+        for crate in "${crates[@]}"; do
+          echo "Installing $crate..."
+          cargo install "$crate"
+        done
+        # ~/.bashrc への追加
+        cat << 'EOF' >> ~/.bashrc
+        alias ei="eza --icons --git"
+        alias ea="eza -a --icons --git"
+        alias ee="eza -aahl --icons --git"
+        alias et="eza -T -a -I 'node_modules|.git|.cache' --icons"
+        alias etd="eza -T -a -D -I 'node_modules|.git|.cache' --icons"
+        alias ls=ei
+        alias la=ea
+        alias ll=ee
+        alias lt=et
+        alias ltd=etd
+        alias l="clear && ls"
+        alias clt="clear && lt"
+        alias cltd="clear && ltd"
+        alias cat='bat'
+        alias ps='procs'
+        alias grep='rg'
+        # alias find='fd'
+        alias od='hexyl'
+        alias wc='tokei'
+        alias cp='fcp'
+        alias top='btm'
+        alias du='dust'
+        alias df='duf'
+        alias dockerv='lazydocker'
+        alias gitv='lazygit'
+        alias gitt='git log --graph --all --date=format-local:"%Y/%m/%d %H:%M:%S" --format="%cd %x09%C(cyan bold)%an%Creset%x09%C(yellow)%h%Creset %C(magenta reverse)%d%Creset %s"'
+        EOF
 hostResolver:
   hosts:
     host.docker.internal: host.lima.internal
