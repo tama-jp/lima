@@ -1,0 +1,159 @@
+vmType: "vz"  # only for macOS; Linux uses 'qemu'
+
+arch: aarch64
+images:
+  - location: "https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-arm64.qcow2"
+    arch: aarch64
+cpus: 2
+memory: "4GiB"
+disk: "60GiB"
+
+mountType: "virtiofs"
+mounts:
+  - location: "~"
+    writable: true
+provision:
+  # システム権限でユーザーを作成
+  - mode: system
+    script: |
+      #!/usr/bin/env bash
+      apt update -y
+      echo 'deb http://apt.llvm.org/bullseye/ llvm-toolchain-bullseye-16 main' >> /etc/apt/sources.list
+      echo 'deb-src http://apt.llvm.org/bullseye/ llvm-toolchain-bullseye-16 main' >> /etc/apt/sources.list
+      apt install -y git build-essential curl wget gnupg2 xz-utils openssl net-tools
+      apt install -y vim build-essential wget ripgrep fd-find duf colordiff
+      # ■ clang
+        # GPG キーの追加
+        wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
+        # パッケージリストの更新
+        apt-get update --fix-missing
+        # clang 16 のインストール
+        apt-get -y install clang-16 || echo "clang-16 installation failed"
+        # clang のパスを設定
+        update-alternatives --install /usr/bin/clang clang /usr/bin/clang-16 1
+        update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-16 1
+      # ■ java
+        mkdir /usr/java
+        cd /usr/java
+        wget https://download.java.net/java/GA/jdk23/3c5b90190c68498b986a97f276efd28a/37/GPL/openjdk-23_linux-aarch64_bin.tar.gz
+        tar zxvf openjdk-23_linux-aarch64_bin.tar.gz
+        rm -rf openjdk-23_linux-aarch64_bin.tar.gz
+      # ■ go
+        GOVERSION=1.23.3
+        curl -s -o /tmp/go.tar.gz https://storage.googleapis.com/golang/go${GOVERSION}.linux-arm64.tar.gz
+        rm -rf /usr/local/go && tar -C /usr/local -xzf /tmp/go.tar.gz
+        rm /tmp/go.tar.gz
+      # ■ Docker
+        apt update -y
+        apt install -y apt-transport-https ca-certificates curl gnupg lsb-release
+        curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --batch --yes --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+        apt update -y
+        apt install -y docker-ce docker-ce-cli containerd.io
+        systemctl start docker
+        systemctl enable docker
+      # ■ Python
+        PYTHONVERSION=3.12.6
+        PYTHONVERSIONBIN=3.12
+        mkdi -p /usr/src
+        cd /usr/src
+        #apt update && apt install -y python3 python3-pip
+        #pip3 install python-language-server
+        apt update -y
+        apt install -y curl git \
+        software-properties-common build-essential \
+        libnss3-dev zlib1g-dev libgdbm-dev libncurses5-dev \
+        libssl-dev libffi-dev libreadline-dev libsqlite3-dev libbz2-dev
+        curl -s -o /tmp/Python-$PYTHONVERSION.tgz  https://www.python.org/ftp/python/$PYTHONVERSION/Python-$PYTHONVERSION.tgz
+        tar xvf /tmp/Python-$PYTHONVERSION.tgz
+        rm -rf /tmp/Python-$PYTHONVERSION.tgz
+        cd /usr/src/Python-$PYTHONVERSION
+        ./configure --enable-optimizations
+        make altinstall
+        ln -s /usr/local/bin/python$PYTHONVERSIONBIN /usr/local/bin/python3
+        ln -s /usr/local/bin/pip$PYTHONVERSIONBIN /usr/local/bin/pip3
+
+  # 通常ユーザー権限で初期化スクリプトを実行
+  - mode: user
+    script: |
+      #!/usr/bin/env bash
+      # ■ JAVA ENV
+        echo "JAVA_HOME=/usr/java/jdk-23"  >> ~/.bashrc
+        echo "PATH=\"/usr/java/jdk-23/bin:\$PATH\""  >> ~/.bashrc
+        echo "CLASSPATH=\".:/usr/java/jdk-23/jre/lib:/usr/java/jdk-23/lib:/usr/java/jdk-23/lib/tools.jar\""  >> ~/.bashrc
+      # ■ NODEJS
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
+        export NVM_DIR="$HOME/.nvm"
+      # ■ nvmの初期化スクリプトを明示的に読み込む
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+        # Node.jsをインストールし、使用可能に設定
+        nvm install 22
+        nvm use 22
+
+      # ■ docker
+        sudo usermod -aG docker $(whoami)
+
+      # ■ go
+        echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
+        export PATH=$PATH:/usr/local/go/bin
+        echo 'export PATH=$PATH:$(go env GOPATH)/bin' >> ~/.bashrc
+        export PATH=$PATH:$(go env GOPATH)/bin
+        go install github.com/jesseduffield/lazydocker@latest
+        go install github.com/jesseduffield/lazygit@latest
+      # ■ rust
+        curl -sS https://starship.rs/install.sh | sh -s -- -y
+        echo 'eval "$(starship init bash)"' >> ~/.bashrc
+        curl https://sh.rustup.rs -sSf | sh -s -- -y
+        . "$HOME/.cargo/env"
+      # ■ Tool
+      #      crates=(
+      #        "eza"
+      #        "bat"
+      #        "procs"
+      #        "hexyl"
+      #        "tokei"
+      #        "bottom"
+      #        "du-dust"
+      #      )
+      #
+      #      # クレートを順番にインストール
+      #      for crate in "${crates[@]}"; do
+      #        echo "Installing $crate..."
+      #        cargo install "$crate"
+      #      done
+      # bashrc
+#      cat << 'EOF' >> ~/.bashrc
+#      alias ei="eza --icons --git"
+#      alias ea="eza -a --icons --git"
+#      alias ee="eza -aahl --icons --git"
+#      alias et="eza -T -a -I 'node_modules|.git|.cache' --icons"
+#      alias etd="eza -T -a -D -I 'node_modules|.git|.cache' --icons"
+#      alias ls=ei
+#      alias la=ea
+#      alias ll=ee
+#      alias lt=et
+#      alias ltd=etd
+#      alias l="clear && ls"
+#      alias clt="clear && lt"
+#      alias cltd="clear && ltd"
+#      alias cat='bat'
+#      alias ps='procs'
+#      alias grep='rg'
+#      # alias find='fd'
+#      alias od='hexyl'
+#      alias wc='tokei'
+#      alias cp='fcp'
+#      alias top='btm'
+#      alias du='dust'
+#      alias df='duf'
+#      alias dockerv='lazydocker'
+#      alias gitv='lazygit'
+#      alias gitt='git log --graph --all --date=format-local:"%Y/%m/%d %H:%M:%S" --format="%cd %x09%C(cyan bold)%an%Creset%x09%C(yellow)%h%Creset %C(magenta reverse)%d%Creset %s"'
+#      EOF
+hostResolver:
+  hosts:
+    host.docker.internal: host.lima.internal
+portForwards:
+  - guestSocket: "/run/user/{{.UID}}/docker.sock"
+    hostSocket: "{{.Dir}}/sock/docker.sock"
