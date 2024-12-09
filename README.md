@@ -26,40 +26,38 @@ Silicon用で作成
 https://github.com/lima-vm/lima
 
 ```shell
-limactl start --name=debian debian12-arm.yaml
+limactl start --name=default debian12-arm.yaml
 ```
 
 ```shell
-limactl stop debian && limactl delete debian
+limactl stop 
+limactl delete
 ```
 
 ```shell
-limactl stop debian 
-limactl delete debian 
-limactl start --debug --name=debian debian12-arm.yaml 
+limactl stop default 
+limactl delete default 
+limactl start --debug --name=default debian12-arm.yaml 
 ```
 
 ```shell
-limactl stop debian 
-limactl start debian
+limactl stop  
+limactl start 
 ```
 
 ```shell
-limactl shell debian
+limactl shell default
 ```
-limactl start debian-12
-limactl stop debian-12
-limactl delete debian-12
-
-limactl stop default
-limactl delete default
+```shell
+ssh -F ~/.lima/default/ssh.config lima-default
+````
 
 # lima コマンド
 
 ## 開始
 
 ```shell
-limactl start debian
+limactl start 
 ```
 
 ## Linuxインスタンスを一覧
@@ -71,15 +69,15 @@ limactl list
 # 削除
 
 ```shell
-limactl delete debian
+limactl delete 
 ```
 
 ```shell
-limactl stop debian
+limactl stop 
 ```
 
 ```shell
-limactl shell debian
+limactl shell 
 ```
 
 # Java
@@ -100,14 +98,28 @@ go version
 # Node.js
 node -v
 
+```shell
+docker stop $(docker ps -a -q)
+docker system prune
+docker container prune
+docker rm -f `docker ps -a -q`
+docker image prune
+docker rmi $(docker images -a -q)
+docker volume prune
+docker network prune
+
+```
+
 
 limactl show-ssh --format=config debian
+
+limactl show-ssh --format=config default
 
 ssh lima-debian
 
 https://dev.classmethod.jp/articles/lima-using-vm-on-macos-without-parallels-vmware/
 https://github.com/lima-vm/lima/discussions/1890
-ssh -F ./ssh-config lima-debian
+ssh -F ./ssh-config lima-default
 
 ssh -F ~/.lima/debian/ssh.config lima-debian
 
