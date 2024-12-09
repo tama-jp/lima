@@ -126,6 +126,41 @@ docker network prune -f
 
 ```
 
+```shell
+❯ cat  ~/.lima/default/ssh.config
+# This SSH config file can be passed to 'ssh -F'.
+# This file is created by Lima, but not used by Lima itself currently.
+# Modifications to this file will be lost on restarting the Lima instance.
+Host lima-default
+  IdentityFile "/Users/go/.lima/_config/user"
+  StrictHostKeyChecking no
+  UserKnownHostsFile /dev/null
+  NoHostAuthenticationForLocalhost yes
+  GSSAPIAuthentication no
+  PreferredAuthentications publickey
+  Compression no
+  BatchMode yes
+  IdentitiesOnly yes
+  Ciphers "^aes128-gcm@openssh.com,aes256-gcm@openssh.com"
+  User go
+  ControlMaster auto
+  ControlPath "/Users/go/.lima/default/ssh.sock"
+  ControlPersist yes
+  Hostname 127.0.0.1
+  Port 60006
+ 
+```
+
+https://qiita.com/shunk_jr/items/3528340ed5c37259b9ae
+
+- ホストにはHostの後ろに書いてあるlimaの環境名を入力します。 (Hostnameの方がうまく行く)
+- ユーザー名にはUserの後ろに書いてあるユーザー名を入力します。
+- 認証タイプはキーペアを選択します。
+- 秘密鍵ファイルにはIdentityFileの後ろに書いてあるパスのうち、ファイル名がidで始まるものを入力します。
+- パスフレーズは適当に入力します。（あとで使うので覚えといてください。）
+
+
+
 https://dev.classmethod.jp/articles/lima-using-vm-on-macos-without-parallels-vmware/
 https://github.com/lima-vm/lima/discussions/1890
 ssh -F ./ssh-config lima-default
