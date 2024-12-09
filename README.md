@@ -99,29 +99,40 @@ go version
 node -v
 
 ```shell
+# すべてのコンテナを停止
 docker stop $(docker ps -a -q)
-docker system prune
-docker container prune
-docker rm -f `docker ps -a -q`
-docker image prune
-docker rmi $(docker images -a -q)
-docker volume prune
-docker network prune
+
+# システム全体のクリーンアップ
+docker system prune -f
+
+# 停止されたコンテナの削除
+docker container prune -f
+
+# 全てのコンテナを強制削除
+docker rm -f $(docker ps -a -q)
+
+# 使用されていないイメージの削除
+docker image prune -f
+
+# すべてのイメージを削除
+docker rmi -f $(docker images -a -q)
+
+# 未使用のボリュームを削除
+docker volume prune -f
+
+# 未使用のネットワークを削除
+docker network prune -f
+
 
 ```
-
-
-limactl show-ssh --format=config debian
-
-limactl show-ssh --format=config default
-
-ssh lima-debian
 
 https://dev.classmethod.jp/articles/lima-using-vm-on-macos-without-parallels-vmware/
 https://github.com/lima-vm/lima/discussions/1890
 ssh -F ./ssh-config lima-default
 
-ssh -F ~/.lima/debian/ssh.config lima-debian
+cat  ~/.lima/default/ssh.config
+
+ssh -F ~/.lima/default/ssh.config lima-default
 
 https://github.com/lima-vm/lima/discussions/1221
 
