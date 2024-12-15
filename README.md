@@ -46,11 +46,20 @@ limactl start
 ```
 
 ```shell
+limactl stop default 
+limactl delete default 
+limactl start --debug --name=default debian12-arm.yaml 
+limactl stop  
+limactl start 
+```
+
+```shell
 limactl shell default
 ```
 ```shell
 ssh -F ~/.lima/default/ssh.config lima-default
 ````
+
 
 # lima コマンド
 

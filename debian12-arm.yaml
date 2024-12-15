@@ -8,7 +8,7 @@ images:
     arch: "aarch64"
 cpus: 4
 memory: "4GiB"
-disk: "20GiB"
+disk: "60GiB"
 
 # サポートされていないマウントタイプ
 #mountTypesUnsupported: ["9p"]
@@ -50,7 +50,7 @@ provision:
         apt -y update 
         echo 'deb http://apt.llvm.org/bullseye/ llvm-toolchain-bullseye-16 main' >> /etc/apt/sources.list
         echo 'deb-src http://apt.llvm.org/bullseye/ llvm-toolchain-bullseye-16 main' >> /etc/apt/sources.list
-        apt -y install git build-essential curl wget gnupg2 xz-utils openssl net-tools vim ripgrep fd-find duf colordiff
+        apt -y install git build-essential curl wget gnupg2 xz-utils openssl net-tools vim ripgrep fd-find duf colordiff libgtk-3-dev libwebkit2gtk-4.0-dev pkg-config nsis
       # ■ clangの設定とインストール
         # GPG キーの追加
         wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
@@ -137,6 +137,12 @@ provision:
         export PATH=$PATH:$(go env GOPATH)/bin
         go install github.com/jesseduffield/lazydocker@latest
         go install github.com/jesseduffield/lazygit@latest
+        go install github.com/air-verse/air@latest
+        go install github.com/jfeliu007/goplantuml/cmd/goplantuml@latest
+        go install github.com/wailsapp/wails/v2/cmd/wails@latest
+        go install github.com/goreleaser/goreleaser/v2@latest
+        go install golang.org/x/tools/cmd/godoc@latest
+        go install golang.org/x/tools/gopls@latest
       # ■ Starshipのインストール
         curl -sS https://starship.rs/install.sh | sh -s -- -y
         echo 'eval "$(starship init bash)"' >> ~/.bashrc
