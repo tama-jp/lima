@@ -142,7 +142,6 @@ provision:
         go install github.com/wailsapp/wails/v2/cmd/wails@latest
         go install github.com/goreleaser/goreleaser/v2@latest
         go install golang.org/x/tools/cmd/godoc@latest
-        go install golang.org/x/tools/gopls@latest
       # ■ Starshipのインストール
         curl -sS https://starship.rs/install.sh | sh -s -- -y
         echo 'eval "$(starship init bash)"' >> ~/.bashrc
