@@ -61,6 +61,7 @@ ssh -F ~/.lima/default/ssh.config lima-default
 ````
 
 
+
 # lima コマンド
 
 ## 開始
@@ -185,3 +186,65 @@ https://qiita.com/mm_sys/items/28a0217256b56918fee4
 https://qiita.com/shunk_jr/items/3528340ed5c37259b9ae
 https://qiita.com/akinami/items/d38b9e7c7f37bd070f40
 
+
+## asdf
+
+git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.14.0
+
+vim ~/.bashrc
+
+```shell
+. "$HOME/.asdf/asdf.sh"
+. "$HOME/.asdf/completions/asdf.bash"
+
+```
+
+// nodejs
+
+```shell
+apt-get install dirmngr gpg curl gawk
+asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
+asdf install nodejs latest
+asdf global nodejs latest
+asdf local nodejs latest
+cat $HOME/.tool-versions
+cat $PWD/.tool-versions
+
+
+```
+
+インストール済みプラグイン一覧
+
+```shell
+asdf plugin list
+```
+
+全プラグインのショートネーム一覧
+```shell
+asdf plugin list all
+
+```
+
+https://github.com/asdf-vm/asdf-plugins
+
+go
+
+```shell
+asdf plugin add golang https://github.com/asdf-community/asdf-golang.git
+asdf install golang latest
+
+vim ~/.bashrc
+
+. ~/.asdf/plugins/golang/set-env.bash
+
+php
+
+```shell
+apt-get install mlocate
+sudo apt install autoconf automake libtool gcc make
+
+
+asdf plugin-add php https://github.com/asdf-community/asdf-php.git
+```
+
+asdf install php latest

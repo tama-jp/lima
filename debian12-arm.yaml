@@ -1,9 +1,9 @@
 arch: aarch64
 images:
   # Debianのイメージ
-  - location: "https://cloud.debian.org/images/cloud/bookworm/20241125-1942/debian-12-genericcloud-arm64-20241125-1942.qcow2"
+  - location: "https://cloud.debian.org/images/cloud/bookworm/20241201-1948/debian-12-genericcloud-arm64-20241201-1948.qcow2"
     arch: "aarch64"
-    digest: "sha512:90241402a244ecd6bb8a5d844db97d18e60ad78f21b3b49e280a4b397179099504945fc89df3db4f1146377120a3743f0da42fcc4ad7ac5644881a4a077e3f1b"
+    digest: "sha512:374c447d9019bbd6c2c1992b23c43c088950e22a43bb93c8b3dc25b12f1e7582034aad9a566062f247ce3cbf8f2aba313bc2396a1998d42d87cea42fe96728aa"
   - location: "https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-arm64.qcow2"
     arch: "aarch64"
 cpus: 4
