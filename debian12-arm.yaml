@@ -29,28 +29,29 @@ provision:
       locale-gen ja_JP.UTF-8
       update-locale LANG=ja_JP.UTF-8
 
-      # 日本語フォントのインストール
+      # ■ 日本語フォントのインストール
       apt install -y fonts-noto-cjk fonts-noto-cjk-extra fonts-ipafont fonts-takao
 
-      # fcitx-mozc (日本語入力システム) のインストール
+      # ■ fcitx-mozc (日本語入力システム) のインストール
       apt install -y fcitx-mozc
 
-      # fcitx をデフォルトの入力メソッドに設定
+      # ■ fcitx をデフォルトの入力メソッドに設定
       echo "export XMODIFIERS=@im=fcitx" >> /etc/environment
       echo "export GTK_IM_MODULE=fcitx" >> /etc/environment
       echo "export QT_IM_MODULE=fcitx" >> /etc/environment
 
-      # 必要に応じて日本語関連パッケージを追加
+      # ■ 必要に応じて日本語関連パッケージを追加
       apt install -y task-japanese
 
-      # 日本語環境の確認用メッセージ
+      # ■ 日本語環境の確認用メッセージ
       echo "日本語環境がインストールされました"
 
       # ■ 基本ツールのインストール
         apt -y update 
         echo 'deb http://apt.llvm.org/bullseye/ llvm-toolchain-bullseye-16 main' >> /etc/apt/sources.list
         echo 'deb-src http://apt.llvm.org/bullseye/ llvm-toolchain-bullseye-16 main' >> /etc/apt/sources.list
-        apt -y install git build-essential curl wget gnupg2 xz-utils openssl net-tools vim ripgrep fd-find duf colordiff libgtk-3-dev libwebkit2gtk-4.0-dev pkg-config nsis
+        apt -y install git build-essential curl wget gnupg2 xz-utils openssl net-tools vim ripgrep fd-find duf colordiff libgtk-3-dev libwebkit2gtk-4.0-dev pkg-config nsis tree unzip jq \
+               ffmpeg git-lfs pandoc 
       # ■ clangの設定とインストール
         # GPG キーの追加
         wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
@@ -101,18 +102,26 @@ provision:
         make altinstall
         ln -s /usr/local/bin/python$PYTHONVERSIONBIN /usr/local/bin/python3
         ln -s /usr/local/bin/pip$PYTHONVERSIONBIN /usr/local/bin/pip3
-
+        pip3 install mycli pgcli
+      # ◼︎ gitHubTool
+        (type -p wget >/dev/null || (sudo apt update && sudo apt-get install wget -y)) \
+        && sudo mkdir -p -m 755 /etc/apt/keyrings \
+        && out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+        && cat $out | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+        && sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+        && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+        && apt update && apt install gh -y
   # ユーザーモードでのプロビジョニング
   - mode: user
     script: |
       #!/usr/bin/env bash
-      # ユーザーロケール設定
+      # ■ ユーザーロケール設定
       echo 'export LANG=ja_JP.UTF-8' >> ~/.bashrc
       echo 'export LANGUAGE=ja_JP:ja' >> ~/.bashrc
       echo 'export LC_ALL=ja_JP.UTF-8' >> ~/.bashrc
       source ~/.bashrc
 
-      # 入力メソッドを有効化
+      # ■ 入力メソッドを有効化
       mkdir -p ~/.config/fcitx
       echo "EnabledIMList=mozc" > ~/.config/fcitx/config
       
@@ -156,8 +165,8 @@ provision:
         cargo install "tokei"
         cargo install "bottom"
         cargo install "du-dust"
-
-      # カスタムエイリアスの定義
+        cargo install "git-cliff"
+      # ■ カスタムエイリアスの定義
       cat << 'EOF' >> ~/.bashrc
         alias ei="eza --icons --git"
         alias ea="eza -a --icons --git"
@@ -181,10 +190,9 @@ provision:
         alias du='dust'
         alias df='duf'
         alias dockerv='lazydocker'
-        alias gitv='lazygit'ls
+        alias gitv='lazygit'
         alias gitt='git log --graph --all --date=format-local:"%Y/%m/%d %H:%M:%S" --format="%cd %x09%C(cyan bold)%an%Creset%x09%C(yellow)%h%Creset %C(magenta reverse)%d%Creset %s"'
       EOF
-      source ~/.bashrc
 ssh:
   loadDotSSHPubKeys: false
   localPort: 60006
